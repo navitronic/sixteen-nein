@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  sixteen-nein <youtube-url> [output-file] [-- <ntsc-rs-cli args>]
+
+Downloads a YouTube video, centre-crops it to 4:3, then processes it with ntsc-rs-cli.
+
+Arguments:
+  youtube-url    URL to download with yt-dlp.
+  output-file    Output path. Defaults to ./sixteen-nein-output.mp4.
+
+Examples:
+  sixteen-nein 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+  sixteen-nein 'https://youtu.be/dQw4w9WgXcQ' output.mp4 -- --scale 480 --interlace
+USAGE
+}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ $# -lt 1 ]]; then
+  usage >&2
+  exit 1
+fi
+
+require_command yt-dlp
+require_command ffmpeg
+require_command ntsc-rs-cli
+
+url=$1
+shift
+
+output="sixteen-nein-output.mp4"
+if [[ $# -gt 0 && "${1:-}" != "--" ]]; then
+  output=$1
+  shift
+fi
+
+ntsc_args=()
+if [[ $# -gt 0 ]]; then
+  if [[ "$1" != "--" ]]; then
+    echo "Unexpected argument: $1" >&2
+    usage >&2
+    exit 1
+  fi
+  shift
+  ntsc_args=("$@")
+fi
+
+mkdir -p "$(dirname "$output")"
+tmpdir=$(mktemp -d)
+cleanup() {
+  rm -rf "$tmpdir"
+}
+trap cleanup EXIT
+
+source_template="$tmpdir/source.%(ext)s"
+cropped="$tmpdir/cropped-4x3.mp4"
+
+echo "Downloading video..." >&2
+yt-dlp \
+  --format 'bv*+ba/best' \
+  --merge-output-format mp4 \
+  --output "$source_template" \
+  "$url"
+
+source_file=$(find "$tmpdir" -maxdepth 1 -type f -name 'source.*' | head -n 1)
+if [[ -z "$source_file" ]]; then
+  echo "Download finished, but no source file was found." >&2
+  exit 1
+fi
+
+echo "Cropping to 4:3..." >&2
+ffmpeg \
+  -hide_banner \
+  -loglevel error \
+  -y \
+  -i "$source_file" \
+  -vf 'crop=2*floor(min(iw,ih*4/3)/2):2*floor(min(ih,iw*3/4)/2)' \
+  -c:v libx264 \
+  -crf 18 \
+  -preset medium \
+  -c:a copy \
+  "$cropped"
+
+echo "Applying ntsc-rs-cli..." >&2
+ntsc-rs-cli \
+  --input "$cropped" \
+  --output "$output" \
+  --overwrite \
+  "${ntsc_args[@]}"
+
+echo "Wrote $output" >&2
