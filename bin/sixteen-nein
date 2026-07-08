@@ -4,9 +4,12 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  sixteen-nein <youtube-url> [output-file] [-- <ntsc-rs-cli args>]
+  sixteen-nein [--size <height>] <youtube-url> [output-file] [-- <ntsc-rs-cli args>]
 
 Downloads a YouTube video, centre-crops it to 4:3, then processes it with ntsc-rs-cli.
+
+Options:
+  -s, --size    Maximum YouTube video height to download, e.g. 480p, 720p, 1080p.
 
 Arguments:
   youtube-url    URL to download with yt-dlp.
@@ -14,6 +17,7 @@ Arguments:
 
 Examples:
   sixteen-nein 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+  sixteen-nein --size 720p 'https://youtu.be/dQw4w9WgXcQ' output.mp4
   sixteen-nein 'https://youtu.be/dQw4w9WgXcQ' output.mp4 -- --scale 480 --interlace
 USAGE
 }
@@ -38,6 +42,47 @@ fi
 require_command yt-dlp
 require_command ffmpeg
 require_command ntsc-rs-cli
+
+height=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -s|--size)
+      if [[ -z "${2:-}" ]]; then
+        echo "Missing value for $1" >&2
+        usage >&2
+        exit 1
+      fi
+      height=${2%p}
+      if [[ ! "$height" =~ ^[0-9]+$ ]]; then
+        echo "Size must be a video height like 480p, 720p, or 1080p." >&2
+        exit 1
+      fi
+      shift 2
+      ;;
+    --size=*)
+      height=${1#--size=}
+      height=${height%p}
+      if [[ ! "$height" =~ ^[0-9]+$ ]]; then
+        echo "Size must be a video height like 480p, 720p, or 1080p." >&2
+        exit 1
+      fi
+      shift
+      ;;
+    -* )
+      echo "Unexpected option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [[ $# -lt 1 ]]; then
+  usage >&2
+  exit 1
+fi
 
 url=$1
 shift
@@ -68,10 +113,14 @@ trap cleanup EXIT
 
 source_template="$tmpdir/source.%(ext)s"
 cropped="$tmpdir/cropped-4x3.mp4"
+format='bv*+ba/best'
+if [[ -n "$height" ]]; then
+  format="bv*[height<=${height}]+ba/best[height<=${height}]/best"
+fi
 
 echo "Downloading video..." >&2
 yt-dlp \
-  --format 'bv*+ba/best' \
+  --format "$format" \
   --merge-output-format mp4 \
   --output "$source_template" \
   "$url"
@@ -88,7 +137,7 @@ ffmpeg \
   -loglevel error \
   -y \
   -i "$source_file" \
-  -vf 'crop=2*floor(min(iw,ih*4/3)/2):2*floor(min(ih,iw*3/4)/2)' \
+  -vf 'crop=2*floor(min(iw\,ih*4/3)/2):2*floor(min(ih\,iw*3/4)/2)' \
   -c:v libx264 \
   -crf 18 \
   -preset medium \
