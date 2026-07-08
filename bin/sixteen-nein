@@ -16,9 +16,9 @@ Arguments:
   output-file    Output path. Defaults to ./sixteen-nein-output.mp4.
 
 Examples:
-  sixteen-nein 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-  sixteen-nein --size 720p 'https://youtu.be/dQw4w9WgXcQ' output.mp4
-  sixteen-nein 'https://youtu.be/dQw4w9WgXcQ' output.mp4 -- --scale 480 --interlace
+  sixteen-nein 'https://www.youtube.com/watch?v=P4hdwRleEIk'
+  sixteen-nein --size 720p 'https://youtu.be/P4hdwRleEIk' output.mp4
+  sixteen-nein 'https://youtu.be/P4hdwRleEIk' output.mp4 -- --scale 480 --interlace
 USAGE
 }
 

@@ -1,10 +1,12 @@
-# sixteen-nein
+# 16:9? Sixteen Nein!
 
 We all know that the look of skateboard videos peaked with VHS and the 4:3 aspect ratio. So, let's revisit that magic.
 
 This repository contains a shell script for combining the process of downloading a YouTube video, centre-cropping it to 4:3, and running it through `ntsc-rs-cli` for a VHS look.
 
-[toc]
+See a demo in action here:
+
+[Thrasher x Spitfire Present: SAN FRANCISCO BURNING - VHSed](https://www.youtube.com/watch?v=EdvIB2yF06w)
 
 ## Requirements
 
@@ -50,9 +52,9 @@ Use `--size` to choose the maximum YouTube video height to download, such as `48
 Examples:
 
 ```sh
-bin/sixteen-nein 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-bin/sixteen-nein --size 720p 'https://youtu.be/dQw4w9WgXcQ' output.mp4
-bin/sixteen-nein 'https://youtu.be/dQw4w9WgXcQ' output.mp4 -- --scale 480 --interlace
+bin/sixteen-nein 'https://www.youtube.com/watch?v=P4hdwRleEIk'
+bin/sixteen-nein --size 720p 'https://youtu.be/P4hdwRleEIk' output.mp4
+bin/sixteen-nein 'https://youtu.be/P4hdwRleEIk' output.mp4 -- --scale 480 --interlace
 ```
 
 The default output path is `sixteen-nein-output.mp4`.
