@@ -4,11 +4,34 @@ Shell scripts for downloading a YouTube video, centre-cropping it to 4:3, and ru
 
 ## Requirements
 
+This script is intended for macOS and Linux. It is a Bash script that depends on Unix shell tools, so Windows is not supported unless you run it through WSL or a similar Linux environment.
+
 Install these commands before running the script:
 
 - `yt-dlp`
 - `ffmpeg`
 - `ntsc-rs-cli`
+
+### macOS
+
+Using [Homebrew](https://brew.sh/):
+
+```sh
+brew install yt-dlp ffmpeg
+```
+
+Install `ntsc-rs-cli` from the [`ntsc-rs` releases page](https://github.com/valadaptive/ntsc-rs/releases).
+
+### Linux
+
+Install `yt-dlp` and `ffmpeg` with your distro's package manager. For example, on Debian or Ubuntu:
+
+```sh
+sudo apt update
+sudo apt install yt-dlp ffmpeg
+```
+
+Install `ntsc-rs-cli` from the [`ntsc-rs` releases page](https://github.com/valadaptive/ntsc-rs/releases).
 
 ## Usage
 
