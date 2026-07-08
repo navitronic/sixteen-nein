@@ -1,6 +1,10 @@
 # sixteen-nein
 
-Shell scripts for downloading a YouTube video, centre-cropping it to 4:3, and running it through `ntsc-rs-cli`.
+We all know that the look of skateboard videos peaked with VHS and the 4:3 aspect ratio. So, let's revisit that magic.
+
+This repository contains a shell script for combining the process of downloading a YouTube video, centre-cropping it to 4:3, and running it through `ntsc-rs-cli` for a VHS look.
+
+[toc]
 
 ## Requirements
 
@@ -35,14 +39,19 @@ Install `ntsc-rs-cli` from the [`ntsc-rs` releases page](https://github.com/vala
 
 ## Usage
 
+> _Important:_ This isn't a quick process, running the script takes a while, even on a powerful machine.
+
 ```sh
-bin/sixteen-nein <youtube-url> [output-file] [-- <ntsc-rs-cli args>]
+bin/sixteen-nein [--size <height>] <youtube-url> [output-file] [-- <ntsc-rs-cli args>]
 ```
+
+Use `--size` to choose the maximum YouTube video height to download, such as `480p`, `720p`, or `1080p`.
 
 Examples:
 
 ```sh
 bin/sixteen-nein 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+bin/sixteen-nein --size 720p 'https://youtu.be/dQw4w9WgXcQ' output.mp4
 bin/sixteen-nein 'https://youtu.be/dQw4w9WgXcQ' output.mp4 -- --scale 480 --interlace
 ```
 
@@ -53,3 +62,21 @@ To call it as `sixteen-nein`, add this repo's `bin` directory to your `PATH`:
 ```sh
 export PATH="$PWD/bin:$PATH"
 ```
+
+## Questions you'd probably ask if you cared about this
+
+### Something is broken or not working
+
+Open an issue, describe the problem and I'll try to help.
+
+### Why?
+
+I had the idea of creating some kind of physical video player with a 4:3 screen that could loop old skate videos. I figured that putting modern videos onto it might be a pain, so I came up with this script to automate the process of converting a video from YouTube. Will I ever actually build the physical player? :shrug:
+
+### The cropping makes the video look dumb
+
+I didn't choose to film it in 16:9... blame someone else.
+
+### Did you just like the dumb pun of the name?
+
+Yes. Like all dumb projects, a good name will give you the impetus to actually finish it.
